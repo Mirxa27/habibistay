@@ -19,8 +19,11 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
+
       "@/*": ["src/*"],
       "@habibistay/*": ["src/*"]
+
+      "@/*": ["src/*"]
     },
     "plugins": [
       {
