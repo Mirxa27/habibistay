@@ -21,7 +21,12 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     if (!userId) {
+
       throw new ApiError(401, 'Unauthorized: Authentication required');
+      return NextResponse.json(
+        { error: 'Unauthorized: Authentication required' }, 
+        { status: 401 }
+      );
     }
 
     // Booking can be created by any authenticated user
@@ -242,7 +247,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(booking, { status: 201 });
 
   } catch (error) {
+
     return handleApiError(error);
+
+    console.error('Error creating booking:', error);
+    
+    // Handle specific Prisma errors
+    if (error instanceof Error) {
+      if (error.name === 'PrismaClientKnownRequestError') {
+        return NextResponse.json(
+          { error: 'Database error occurred while creating booking' },
+          { status: 500 }
+        );
+      }
+    }
+    
+    // Generic error response
+    return NextResponse.json(
+      { error: 'An unexpected error occurred while creating the booking' },
+      { status: 500 }
+    );
   }
 }
 
@@ -255,7 +279,13 @@ export async function GET(request: NextRequest) {
 
     // Check if user is authenticated
     if (!userId) {
+
       throw new ApiError(401, 'Unauthorized: Authentication required');
+
+      return NextResponse.json(
+        { error: 'Unauthorized: Authentication required' }, 
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -363,6 +393,13 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
+
     return handleApiError(error);
+
+    console.error('Error fetching bookings:', error);
+    return NextResponse.json(
+      { error: 'An error occurred while fetching bookings' },
+      { status: 500 }
+    );
   }
 }

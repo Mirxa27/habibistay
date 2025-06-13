@@ -37,13 +37,24 @@ async function handlePost(request: NextRequest) { // Renamed from POST
 
     // Check if user is authenticated
     if (!userId) {
+
       throw new ApiError(401, 'Unauthorized: Authentication required');
+      return NextResponse.json(
+        { error: 'Unauthorized: Authentication required' }, 
+        { status: 401 }
+      );
+
     }
 
     // Check if user has the required role (HOST, PROPERTY_MANAGER, or ADMIN)
     // Need to check as string for the build to pass
     if (!['HOST', 'PROPERTY_MANAGER', 'ADMIN'].includes(userRole as string)) {
+
       throw new ApiError(403, 'Forbidden: Insufficient permissions to create a property');
+      return NextResponse.json(
+        { error: 'Forbidden: Insufficient permissions to create a property' }, 
+        { status: 403 }
+      );
     }
 
     // Parse the request body
@@ -132,6 +143,23 @@ async function handlePost(request: NextRequest) { // Renamed from POST
 
   } catch (error) {
     return handleApiError(error);
+    console.error('Error creating property:', error);
+    
+    // Handle specific Prisma errors
+    if (error instanceof Error) {
+      if (error.name === 'PrismaClientKnownRequestError') {
+        return NextResponse.json(
+          { error: 'Database error occurred while creating property' },
+          { status: 500 }
+        );
+      }
+    }
+    
+    // Generic error response
+    return NextResponse.json(
+      { error: 'An unexpected error occurred while creating the property' },
+      { status: 500 }
+    );
   }
 }
 
