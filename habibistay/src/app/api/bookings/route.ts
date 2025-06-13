@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { BookingStatus } from '@prisma/client';
+import { ApiError, handleApiError } from '@/lib/errors';
 
 // Define the expected request body type for booking creation
 interface BookingCreateRequest {
@@ -20,10 +21,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Authentication required' }, 
-        { status: 401 }
-      );
+      throw new ApiError(401, 'Unauthorized: Authentication required');
     }
 
     // Booking can be created by any authenticated user
@@ -244,23 +242,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(booking, { status: 201 });
 
   } catch (error) {
-    console.error('Error creating booking:', error);
-    
-    // Handle specific Prisma errors
-    if (error instanceof Error) {
-      if (error.name === 'PrismaClientKnownRequestError') {
-        return NextResponse.json(
-          { error: 'Database error occurred while creating booking' },
-          { status: 500 }
-        );
-      }
-    }
-    
-    // Generic error response
-    return NextResponse.json(
-      { error: 'An unexpected error occurred while creating the booking' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -273,10 +255,7 @@ export async function GET(request: NextRequest) {
 
     // Check if user is authenticated
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Authentication required' }, 
-        { status: 401 }
-      );
+      throw new ApiError(401, 'Unauthorized: Authentication required');
     }
 
     const { searchParams } = new URL(request.url);
@@ -384,10 +363,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching bookings:', error);
-    return NextResponse.json(
-      { error: 'An error occurred while fetching bookings' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
