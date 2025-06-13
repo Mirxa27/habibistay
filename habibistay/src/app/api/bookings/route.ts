@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { BookingStatus } from '@prisma/client';
+import { ApiError, handleApiError } from '@/lib/errors';
 
 // Define the expected request body type for booking creation
 interface BookingCreateRequest {
@@ -20,6 +21,8 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     if (!userId) {
+
+      throw new ApiError(401, 'Unauthorized: Authentication required');
       return NextResponse.json(
         { error: 'Unauthorized: Authentication required' }, 
         { status: 401 }
@@ -244,6 +247,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(booking, { status: 201 });
 
   } catch (error) {
+
+    return handleApiError(error);
+
     console.error('Error creating booking:', error);
     
     // Handle specific Prisma errors
@@ -273,6 +279,9 @@ export async function GET(request: NextRequest) {
 
     // Check if user is authenticated
     if (!userId) {
+
+      throw new ApiError(401, 'Unauthorized: Authentication required');
+
       return NextResponse.json(
         { error: 'Unauthorized: Authentication required' }, 
         { status: 401 }
@@ -384,6 +393,9 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
+
+    return handleApiError(error);
+
     console.error('Error fetching bookings:', error);
     return NextResponse.json(
       { error: 'An error occurred while fetching bookings' },

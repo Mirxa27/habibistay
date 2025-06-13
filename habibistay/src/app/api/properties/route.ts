@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { ApiError, handleApiError } from '@/lib/errors';
 
 // Define the expected request body type
 interface PropertyCreateRequest {
@@ -36,15 +37,20 @@ async function handlePost(request: NextRequest) { // Renamed from POST
 
     // Check if user is authenticated
     if (!userId) {
+
+      throw new ApiError(401, 'Unauthorized: Authentication required');
       return NextResponse.json(
         { error: 'Unauthorized: Authentication required' }, 
         { status: 401 }
       );
+
     }
 
     // Check if user has the required role (HOST, PROPERTY_MANAGER, or ADMIN)
     // Need to check as string for the build to pass
     if (!['HOST', 'PROPERTY_MANAGER', 'ADMIN'].includes(userRole as string)) {
+
+      throw new ApiError(403, 'Forbidden: Insufficient permissions to create a property');
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions to create a property' }, 
         { status: 403 }
@@ -136,6 +142,7 @@ async function handlePost(request: NextRequest) { // Renamed from POST
     return NextResponse.json(property, { status: 201 });
 
   } catch (error) {
+    return handleApiError(error);
     console.error('Error creating property:', error);
     
     // Handle specific Prisma errors

@@ -23,7 +23,12 @@
       "@/*": ["src/*"],
       "@habibistay/*": ["src/*"]
 
+
+      "@/*": ["src/*"],
+      "@habibistay/*": ["src/*"]
+
       "@/*": ["src/*"]
+
     },
     "plugins": [
       {
