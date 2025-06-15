@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -19,16 +15,9 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
-
       "@/*": ["src/*"],
-      "@habibistay/*": ["src/*"]
-
-
-      "@/*": ["src/*"],
-      "@habibistay/*": ["src/*"]
-
-      "@/*": ["src/*"]
-
+      "@habibistay/*": ["src/*"],
+      "@prisma/client": ["tests/prisma-client-mock.ts"]
     },
     "plugins": [
       {

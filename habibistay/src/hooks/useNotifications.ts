@@ -243,6 +243,7 @@ export function useNotifications() {
 
   return {
     isLoading,
+    loading: isLoading,
     error,
     notifications,
     unreadCount,
