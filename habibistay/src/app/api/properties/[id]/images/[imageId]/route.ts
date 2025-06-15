@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
-// Temporarily commenting out missing import for build to pass
-// import { deleteImage } from '@/config/cloudinary';
+import { deleteImage } from '@/config/cloudinary';
 
 /**
  * GET /api/properties/[id]/images/[imageId]
@@ -256,10 +255,9 @@ export async function DELETE(
       );
     }
     
-    // 3. Delete the image from Cloudinary - commented out for build to pass
+    // 3. Delete the image from Cloudinary
     try {
-      // await deleteImage(imageToDelete.publicId);
-      console.log('Image deletion from Cloudinary disabled for build');
+      await deleteImage(imageToDelete.publicId);
     } catch (error) {
       console.error('Error deleting image from Cloudinary:', error);
       // Continue with database deletion even if Cloudinary deletion fails

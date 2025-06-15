@@ -2,21 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
-// Temporarily commented out for build to pass
-// import { uploadImage, CloudinaryUploadResult } from '@/config/cloudinary';
-
-// Dummy implementation for build
-const uploadImage = async (_file: Uint8Array, _folder: string) => {
-  return {
-    public_id: `dummy_${Date.now()}`,
-    url: 'https://example.com/dummy.jpg',
-    secure_url: 'https://example.com/dummy.jpg',
-    width: 800,
-    height: 600,
-    format: 'jpg',
-    bytes: 1024,
-  };
-};
+import { uploadImage, CloudinaryUploadResult } from '@/config/cloudinary';
 
 /**
  * POST /api/properties/[id]/images

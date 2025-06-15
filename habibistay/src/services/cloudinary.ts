@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { writeFile } from 'fs/promises';
+import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
