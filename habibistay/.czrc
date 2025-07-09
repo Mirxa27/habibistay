@@ -1,0 +1,72 @@
+{
+  "path": "cz-conventional-changelog",
+  "types": [
+    {
+      "value": "feat",
+      "name": "feat:     A new feature",
+      "emoji": "✨"
+    },
+    {
+      "value": "fix",
+      "name": "fix:      A bug fix",
+      "emoji": "🐛"
+    },
+    {
+      "value": "docs",
+      "name": "docs:     Documentation only changes",
+      "emoji": "📚"
+    },
+    {
+      "value": "style",
+      "name": "style:    Changes that do not affect the meaning of the code",
+      "emoji": "💎"
+    },
+    {
+      "value": "refactor",
+      "name": "refactor: A code change that neither fixes a bug nor adds a feature",
+      "emoji": "📦"
+    },
+    {
+      "value": "perf",
+      "name": "perf:     A code change that improves performance",
+      "emoji": "🚀"
+    },
+    {
+      "value": "test",
+      "name": "test:     Adding missing tests or correcting existing tests",
+      "emoji": "🚨"
+    },
+    {
+      "value": "build",
+      "name": "build:    Changes that affect the build system or external dependencies",
+      "emoji": "🛠"
+    },
+    {
+      "value": "ci",
+      "name": "ci:       Changes to our CI configuration files and scripts",
+      "emoji": "⚙️"
+    },
+    {
+      "value": "chore",
+      "name": "chore:    Other changes that don't modify src or test files",
+      "emoji": "♻️"
+    },
+    {
+      "value": "revert",
+      "name": "revert:   Reverts a previous commit",
+      "emoji": "🗑"
+    }
+  ],
+  "messages": {
+    "type": "Select the type of change that you're committing:",
+    "scope": "Denote the SCOPE of this change (optional):",
+    "subject": "Write a SHORT, IMPERATIVE tense description of the change:\n",
+    "body": "Provide a LONGER description of the change (optional). Use \"|\" to break new line:\n",
+    "breaking": "List any BREAKING CHANGES (optional):\n",
+    "footer": "List any ISSUES CLOSED by this change (optional). E.g.: ISSUES CLOSED: #123, #245:\n"
+  },
+  "allowCustomScopes": true,
+  "allowBreakingChanges": ["feat", "fix", "refactor", "perf", "build"],
+  "skipQuestions": ["body", "footer"],
+  "subjectLimit": 100
+}

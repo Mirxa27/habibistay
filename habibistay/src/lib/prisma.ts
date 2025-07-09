@@ -1,17 +1,36 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-// Learn more: https://pris.ly/d/help/next-js-best-practices
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | undefined;
+}
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+const prismaClientSingleton = () => {
+  return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  })
+    errorFormat: 'pretty',
+  });
+};
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+const prisma = globalThis.__prisma ?? prismaClientSingleton();
 
-export default prisma
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.__prisma = prisma;
+}
+
+export default prisma;
+
+// Graceful shutdown
+process.on('beforeExit', async () => {
+  await prisma.$disconnect();
+});
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
