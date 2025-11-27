@@ -1,6 +1,6 @@
-import { BookingStatus, NotificationType, UserRole } from '@prisma/client';
+import { NotificationType, BookingStatus } from '@prisma/client';
 import prisma from '@/lib/prisma';
-
+import { emailService } from './email.service';
 // Types for notification payloads
 export interface BookingNotificationPayload {
   bookingId: string;
@@ -264,60 +264,108 @@ export class NotificationService {
   
   /**
    * Send an email notification for booking updates
-   * This is a mock implementation that would be replaced with actual email sending
+   * Production implementation using email service
    */
   private async sendBookingEmailNotification(
     booking: any,
     status: BookingStatus
   ): Promise<void> {
-    // In a real implementation, you would integrate with an email service like SendGrid, AWS SES, etc.
-    // For now, we'll just log that an email would be sent
-    console.log(`[EMAIL] Sending booking update email to ${booking.guest.email}`);
-    console.log(`[EMAIL] Subject: Your booking at ${booking.property.title} has been ${status.toLowerCase()}`);
-    
-    // Additional email could be sent to the host
-    const hostEmail = await this.getHostEmail(booking.property.ownerId);
-    if (hostEmail) {
-      console.log(`[EMAIL] Sending booking update email to host at ${hostEmail}`);
-      console.log(`[EMAIL] Subject: A booking for ${booking.property.title} has been ${status.toLowerCase()}`);
+    try {
+      // Send confirmation email to guest if booking is confirmed
+      if (status === 'CONFIRMED') {
+        await emailService.sendBookingConfirmation({
+          to: booking.guest.email,
+          guestName: booking.guest.name || 'Guest',
+          propertyTitle: booking.property.title,
+          checkInDate: new Date(booking.checkInDate).toLocaleDateString(),
+          checkOutDate: new Date(booking.checkOutDate).toLocaleDateString(),
+          totalPrice: Number(booking.totalPrice),
+          bookingId: booking.id,
+        });
+      }
+      
+      // Send cancellation email if booking is cancelled
+      if (status === 'CANCELLED') {
+        await emailService.sendBookingCancellation({
+          to: booking.guest.email,
+          guestName: booking.guest.name || 'Guest',
+          propertyTitle: booking.property.title,
+          bookingId: booking.id,
+        });
+      }
+      
+      console.log(`Email sent to ${booking.guest.email} for booking ${status}`);
+    } catch (error) {
+      console.error('Failed to send booking email:', error);
+      // Don't throw - email failure shouldn't break the notification flow
     }
   }
   
   /**
    * Send an email notification for payment updates
-   * This is a mock implementation that would be replaced with actual email sending
+   * Production implementation using email service
    */
   private async sendPaymentEmailNotification(
     booking: any,
     amount: number,
     status: string
   ): Promise<void> {
-    // Mock email sending
-    console.log(`[EMAIL] Sending payment update email to ${booking.guest.email}`);
-    console.log(`[EMAIL] Subject: Your payment for ${booking.property.title} has been ${status.toLowerCase()}`);
-    
-    // Email to host
-    const hostEmail = await this.getHostEmail(booking.property.ownerId);
-    if (hostEmail) {
-      console.log(`[EMAIL] Sending payment update email to host at ${hostEmail}`);
-      console.log(`[EMAIL] Subject: Payment received for booking at ${booking.property.title}`);
+    try {
+      // Get payment details
+      const payment = await prisma.payment.findFirst({
+        where: { bookingId: booking.id },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (payment && status === 'COMPLETED') {
+        await emailService.sendPaymentReceipt({
+          to: booking.guest.email,
+          guestName: booking.guest.name || 'Guest',
+          amount,
+          currency: payment.currency || 'USD',
+          paymentId: payment.id,
+          bookingId: booking.id,
+          propertyTitle: booking.property.title,
+        });
+      }
+      
+      console.log(`Payment email sent to ${booking.guest.email}`);
+    } catch (error) {
+      console.error('Failed to send payment email:', error);
+      // Don't throw - email failure shouldn't break the notification flow
     }
   }
   
   /**
    * Send a reminder email for upcoming bookings
-   * This is a mock implementation that would be replaced with actual email sending
+   * Production implementation using email service
    */
   private async sendReminderEmailNotification(booking: any): Promise<void> {
-    // Mock email sending
-    console.log(`[EMAIL] Sending reminder email to ${booking.guest.email}`);
-    console.log(`[EMAIL] Subject: Your stay at ${booking.property.title} is coming up!`);
-    
-    // Email to host
+    try {
+      // Send reminder to guest
+      await emailService.sendEmail({
+        to: booking.guest.email,
+        subject: `Reminder: Your stay at ${booking.property.title} is coming up!`,
+        html: `
+          <p>Dear ${booking.guest.name || 'Guest'},</p>
+          <p>This is a friendly reminder that your stay at <strong>${booking.property.title}</strong> is coming up soon!</p>
+          <p><strong>Check-in:</strong> ${new Date(booking.checkInDate).toLocaleDateString()}</p>
+          <p><strong>Check-out:</strong> ${new Date(booking.checkOutDate).toLocaleDateString()}</p>
+          <p>We hope you have a wonderful stay!</p>
+          <p>The HabibiStay Team</p>
+        `,
+      });
+      
+      console.log(`Reminder email sent to ${booking.guest.email}`);
+    } catch (error) {
+      console.error('Failed to send reminder email:', error);
+      // Don't throw - email failure shouldn't break the notification flow
+    }
+  
+    // Note: Host reminder implementation can be added here if needed
     const hostEmail = await this.getHostEmail(booking.property.ownerId);
     if (hostEmail) {
-      console.log(`[EMAIL] Sending reminder email to host at ${hostEmail}`);
-      console.log(`[EMAIL] Subject: Upcoming guest arrival at ${booking.property.title}`);
+      console.log(`[TODO] Send reminder email to host at ${hostEmail}`);
     }
   }
   
